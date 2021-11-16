@@ -1,0 +1,15 @@
+
+TO DO:
+
+-Add ghosts (behaviour)
+-Add power cookies
+-Add level progression
+-Load level from .txt file
+
+====================================
+
+DONE:
+
+-Fix PacMan movement
+-Add teleport zone
+-Fps control
