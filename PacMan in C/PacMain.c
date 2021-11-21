@@ -2,20 +2,22 @@
 
 int main()
 {
-    int freeze = 1000/15;
+    int freeze = 1000/20;
 
     system("cls");
     hidecursor();
-    initialize(allGhosts);
+    initialize();
     Sleep(3000);
 
-    while (1)
+    while (status.lives != 0)
     {
         keyIn();
-        newFrame();
+        pacMan();
+        ghosts();
         displayGame();
-
-        Sleep(freeze);
+        Sleep(freeze);  
         cursorSet(0, 0);
     }
+
+    gameOver();
 }

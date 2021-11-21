@@ -2,8 +2,18 @@
 TO DO:
 
 -Add ghosts (behaviour)
--Add power cookies
+	-Red - OK
+	-Blue
+	-Pink
+	-Yellow
+
+-Add different ghost modes
+	-Chase
+	-Scatter
+	-Frightened (power cookies)
+
 -Add level progression
+-Add fruits
 -Load level from .txt file
 
 ====================================
