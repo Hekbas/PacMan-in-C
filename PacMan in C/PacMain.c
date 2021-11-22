@@ -14,7 +14,8 @@ int main()
         keyIn();
         pacMan();
         ghosts();
-        displayGame();
+        displayGame(0, 0, H, W);
+        devMode(status.devMode);
         Sleep(freeze);  
         cursorSet(0, 0);
     }

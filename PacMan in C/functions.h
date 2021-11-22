@@ -46,6 +46,8 @@ struct Status
     int points;
     bool chase;
     bool frightened;
+
+    bool devMode;
 };
 
 struct PacMan myPacMan =
@@ -76,6 +78,8 @@ struct Status status =
     .points = 0,
     .chase = false,
     .frightened = false,
+
+    .devMode = true,
 };
 
 char playfield[H][W] =
@@ -175,8 +179,14 @@ void displayGame()
     {
         for (int j = 0; j < W; j++)
         {
-            if (playfield[i][j] == '·')
+            if (playfield[i][j] == '#')
+                printf("\x1b[34m%c\x1b[0m", playfield[i][j]);
+            else if (playfield[i][j] == '·')
                 printf("%c", 250);  // 250 - special char ·
+            else if (playfield[i][j] == '<' || playfield[i][j] == '>' || playfield[i][j] == 'v' || playfield[i][j] == '^')
+                printf("\x1b[1m\x1b[33m%c\x1b[0m", playfield[i][j]);
+            else if (playfield[i][j] == 'R')
+                printf("\x1b[31m%c\x1b[0m", playfield[i][j]);
             else
                 printf("%c", playfield[i][j]);
         }
@@ -192,12 +202,28 @@ void displayReady()
     {
         for (int j = 0; j < 28; j++)
         {
-            if (ready[i][j] == '·')
+            if (ready[i][j] == '#')
+                printf("\x1b[34m%c\x1b[0m", ready[i][j]);
+            else if (ready[i][j] == '·')
                 printf("%c", 250);  // 250 - special char ·
+            else if (i == 0 && j > 8 && j < 19)
+                printf("\x1b[1m\x1b[36m%c\x1b[0m", ready[i][j]);
+            else if (i == 6 && j > 10 && j < 17)
+                printf("\x1b[1m\x1b[33m%c\x1b[0m", ready[i][j]);
             else
                 printf("%c", ready[i][j]);
         }
         printf("\n");
+    }
+}
+
+void devMode(bool devMode)
+{
+    if (devMode == true)
+    {
+        printf("\n\nPacMan: (%.2d,%.2d)", myPacMan.pos.x, myPacMan.pos.y);
+        printf("\nGhost Chasing: %d", status.chase);
+        printf("\nGhosts Frightened: %d", status.frightened);
     }
 }
 
@@ -272,7 +298,10 @@ void pacMan()
         if (playfield[myPacMan.pos.y][myPacMan.pos.x] == '·')
             status.points += 10;
         else if (playfield[myPacMan.pos.y][myPacMan.pos.x] == '+')
+        {
             status.points += 50;
+            status.frightened = true;
+        }
     }
 
     // redraw pacMan
@@ -381,6 +410,7 @@ void gameOver()
 {
 
 }
+
 // Set cursor position in console
 // see http://www.dreamincode.net/forums/topic/153240-console-cursor-coordinates/
 void cursorSet(int x, int y)
