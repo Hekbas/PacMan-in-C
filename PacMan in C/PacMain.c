@@ -13,12 +13,13 @@ int main()
     {
         keyIn();
         pacMan();
-        ghosts();
+        statusCheck();
         displayGame(0, 0, H, W);
         devMode(status.devMode);
-        Sleep(freeze);  
+        Sleep(freeze);
         cursorSet(0, 0);
     }
 
-    gameOver();
+    displayOver();
+    getchar();
 }

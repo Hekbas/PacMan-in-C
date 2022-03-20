@@ -11,8 +11,10 @@ void displayGame();
 void displayReady();
 void keyIn();
 void pacMan();
-void ghosts();
-void gameOver();
+void statusCheck();
+void ghostsChase();
+void ghostsScatter();
+void displayOver();
 void cursorSet(int x, int y);
 void hidecursor();
 
@@ -53,7 +55,7 @@ struct Status
 struct PacMan myPacMan =
 {
     {
-        .x = 13,
+        .x = 13, 
         .y = 23,
     },
     .vx = 0,
@@ -76,7 +78,7 @@ struct Status status =
 {
     .lives = 3,
     .points = 0,
-    .chase = false,
+    .chase = true,
     .frightened = false,
 
     .devMode = true,
@@ -96,7 +98,7 @@ char playfield[H][W] =
     {"######·##### ## #####·######"},
     {"######·##### ## #####·######"},
     {"######·##          ##·######"},
-    {"######·## ######## ##·######"},
+    {"######·## ###__### ##·######"},
     {"######·## #      # ##·######"},
     {"      ·   # B P Y#   ·      "},
     {"######·## #      # ##·######"},
@@ -163,6 +165,17 @@ char ready[7][28] =
     {"######·##  READY!  ##·######"},
 };
 
+char over[7][28] =
+{
+    {"###### ##          ## ######"},
+    {"###### ## ######## ## ######"},
+    {"###### ## #      # ## ######"},
+    {"          #      #          "},
+    {"###### ## #      # ## ######"},
+    {"###### ## ######## ## ######"},
+    {"###### ##GAME OVER!## ######"},
+};
+
 void initialize()
 {
     displayGame();
@@ -171,6 +184,17 @@ void initialize()
     cursorSet(0, 0);
 
     // initialize all ghosts ???
+}
+
+void statusCheck()
+{
+    if (status.chase == true)
+        ghostsChase();
+    else
+        ghostsScatter();
+
+    //if(status.frightened == true)
+        //ghostsFrightened();
 }
 
 void displayGame()
@@ -217,13 +241,24 @@ void displayReady()
     }
 }
 
-void devMode(bool devMode)
+void displayOver()
 {
-    if (devMode == true)
+    cursorSet(0, 11);
+
+    for (int i = 0; i < 7; i++)
     {
-        printf("\n\nPacMan: (%.2d,%.2d)", myPacMan.pos.x, myPacMan.pos.y);
-        printf("\nGhost Chasing: %d", status.chase);
-        printf("\nGhosts Frightened: %d", status.frightened);
+        for (int j = 0; j < 28; j++)
+        {
+            if (over[i][j] == '#')
+                printf("\x1b[34m%c\x1b[0m", over[i][j]);
+            else if (over[i][j] == '·')
+                printf("%c", 250);  // 250 - special char ·
+            else if (i == 6 && j > 8 && j < 19)
+                printf("\x1b[31m%c\x1b[0m", over[i][j]);
+            else
+                printf("%c", over[i][j]);
+        }
+        printf("\n");
     }
 }
 
@@ -236,13 +271,13 @@ void keyIn()
         switch (ch)
         {
         case 72: case 'w': case'W':  // up
-            myPacMan.vyTurn = -1;
             myPacMan.vxTurn = 0;
+            myPacMan.vyTurn = -1;
             myPacMan.shape = 'v';
             break;
         case 80: case 's': case'S':  // down
-            myPacMan.vyTurn = +1;
             myPacMan.vxTurn = 0;
+            myPacMan.vyTurn = +1;           
             myPacMan.shape = '^';
             break;
         case 75: case 'a': case'A':  // left
@@ -308,7 +343,7 @@ void pacMan()
     playfield[myPacMan.pos.y][myPacMan.pos.x] = myPacMan.shape;
 }
 
-void ghosts()
+void ghostsChase()
 {
     int x = red.pos.x;
     int y = red.pos.y;
@@ -318,11 +353,21 @@ void ghosts()
 
     if (x == myPacMan.pos.x && y == myPacMan.pos.y)  //eaten pacMan?
     {
-        // MUST FINISH
-        status.lives--;
-        if (status.lives == 0)
-        {
+        red.pos.x = 13;
+        red.pos.y = 11;
 
+        red.vx = -1;
+        red.vy = 0;
+
+        if (status.frightened == true)
+        {
+            status.frightened = false;
+        }
+        else
+        {
+            status.lives--;
+            myPacMan.pos.x = 13;
+            myPacMan.pos.y = 23;
         }
     }
     else if (logic[y][x] == 'I')  //chek for intersections
@@ -341,9 +386,21 @@ void ghosts()
                      logic[j][i] == 'D') &&
                      logic[j][i] != red.posOld)
                 {
+                    int xDelta;
+                    int yDelta;
+
                     //find wich path has the shortest distance (straight line) to pacMan
-                    int xDelta = i - myPacMan.pos.x;
-                    int yDelta = j - myPacMan.pos.y;
+                    if (status.chase == true)
+                    {
+                        xDelta = i - myPacMan.pos.x;
+                        yDelta = j - myPacMan.pos.y;
+                    }
+                    else
+                    {
+                        xDelta = i - 0;
+                        yDelta = j - 27;
+                    }
+                    
                     float dist = hypot(xDelta, yDelta); 
 
                     if (dist < distMin)
@@ -406,9 +463,21 @@ void ghosts()
     playfield[red.pos.y][red.pos.x] = 'R';
 }
 
-void gameOver()
+void ghostsScatter()
 {
+    //ghosts goto corners
+    //red (0,28)
 
+}
+
+void devMode(bool devMode)
+{
+    if (devMode == true)
+    {
+        printf("\n\nPacMan: (%.2d,%.2d)", myPacMan.pos.x, myPacMan.pos.y);
+        printf("\nGhost Chasing: %d", status.chase);
+        printf("\nGhosts Frightened: %d", status.frightened);
+    }
 }
 
 // Set cursor position in console
